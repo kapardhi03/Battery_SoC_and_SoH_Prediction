@@ -4,8 +4,8 @@ from sklearn.preprocessing import MinMaxScaler
 import torch.nn as nn
 import numpy as np
 
-model_info = torch.load('/Users/kapardhikannekanti/Raghav/lstm_model_info.pth') # replace with your local path
-state_dict = torch.load('/Users/kapardhikannekanti/Raghav/lstm_model.pth')   # replace with your local path
+model_info = torch.load('/Users/kapardhikannekanti/Battery_SoC_and_SoH_Prediction/lstm_model_info.pth') # replace with your local path
+state_dict = torch.load('/Users/kapardhikannekanti/Battery_SoC_and_SoH_Prediction/lstm_model.pth')   # replace with your local path
 
 model = LSTMModel(model_info['input_size'], model_info['hidden_size'], model_info['output_size'])
 model.load_state_dict(state_dict)

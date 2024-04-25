@@ -4,7 +4,7 @@ import torch
 from model import predict_soh_soc, fit_scalers, model
 
 
-train_data = pd.read_excel('/Users/kapardhikannekanti/Raghav/consolidated data.xlsx')
+train_data = pd.read_excel('/Users/kapardhikannekanti/Battery_SoC_and_SoH_Prediction/consolidated data.xlsx')
 X_train = train_data[['speed', 'distance', 'remainingrange', 'batteryvoltage', 'batterycurrent',
                       'cellmaxvoltage', 'cellminvoltage', 'mcu_dcvoltage', 'mcu_dccurrent',
                       'mcu_acrmscurrent', 'mcu_speed', 'mcu_temperature']].values
@@ -38,7 +38,8 @@ def main():
     mcu_ac_rms_current = st.number_input("Enter MCU AC rms current:", value=0.0)
     mcu_speed = st.number_input("Enter MCU speed:", value=0.0)
     mcu_temperature = st.number_input("Enter MCU temperature:", value=0.0)
-
+    max_temperature = st.number_input("Enter Max TemperratureL:" , value=0.0)
+    battery_changing_status = st.number_input("Enter status:",value=False)
     input_data = pd.DataFrame([[speed, distance, remaining_range, battery_voltage, battery_current,
                                 cell_max_voltage, cell_min_voltage, mcu_dc_voltage, mcu_dc_current,
                                 mcu_ac_rms_current, mcu_speed, mcu_temperature]],
