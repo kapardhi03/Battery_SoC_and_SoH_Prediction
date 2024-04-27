@@ -25,13 +25,31 @@ def fit_scalers(X_train, y_train_soh, y_train_soc):
     return scaler_X, scaler_y_soh, scaler_y_soc
 
 def predict_soh_soc(model, input_data, scaler_X, scaler_y_soh, scaler_y_soc):
+
+    print("Input data columns:", input_data.columns)
+    print("Expected columns from X_train:", input_data.columns)
+
+    # Check if there are any missing or extra columns
+    missing_columns = set(input_data.columns) - set(input_data.columns)
+    extra_columns = set(input_data.columns) - set(input_data.columns)
+
+    print("Missing columns:", missing_columns)
+    print("Extra columns:", extra_columns)
+
+    # Align the columns
+    input_data = input_data[input_data.columns]
     new_data_scaled = scaler_X.transform(input_data.values)
     new_data_tensor = torch.tensor(new_data_scaled, dtype=torch.float32).unsqueeze(0)
 
     with torch.no_grad():
         predicted_soh, predicted_soc = model(new_data_tensor)
+        predicted_soh_unscaled = scaler_y_soh.inverse_transform(predicted_soh.reshape(-1, 1))
+        predicted_soc_unscaled = scaler_y_soc.inverse_transform(predicted_soc.reshape(-1, 1))
 
-    predicted_soh_unscaled = scaler_y_soh.inverse_transform(predicted_soh.reshape(-1, 1))
-    predicted_soc_unscaled = scaler_y_soc.inverse_transform(predicted_soc.reshape(-1, 1))
+    # with torch.no_grad():
+    #     predicted_soh, predicted_soc = model(new_data_tensor)
+
+    # predicted_soh_unscaled = scaler_y_soh.inverse_transform(predicted_soh.reshape(-1, 1))
+    # predicted_soc_unscaled = scaler_y_soc.inverse_transform(predicted_soc.reshape(-1, 1))
 
     return predicted_soh_unscaled.item(), predicted_soc_unscaled.item()

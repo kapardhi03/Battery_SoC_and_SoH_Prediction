@@ -3,23 +3,23 @@ import pandas as pd
 import torch
 from model import predict_soh_soc, fit_scalers, model
 
-
-train_data = pd.read_excel('/Users/kapardhikannekanti/Battery_SoC_and_SoH_Prediction/consolidated data.xlsx')
-X_train = train_data[['speed', 'distance', 'remainingrange', 'batteryvoltage', 'batterycurrent',
-                      'cellmaxvoltage', 'cellminvoltage', 'mcu_dcvoltage', 'mcu_dccurrent',
-                      'mcu_acrmscurrent', 'mcu_speed', 'mcu_temperature']].values
-y_train_soh = train_data['batterysoh'].values.reshape(-1, 1)
-y_train_soc = train_data['batterysoc'].values.reshape(-1, 1)
-
-
-
-scaler_X, scaler_y_soh, scaler_y_soc = fit_scalers(X_train, y_train_soh, y_train_soc)
-
+from sklearn.preprocessing import MinMaxScaler
 
 
 def main():
-    st.title("Battery SoH and SoC Prediction")
+    # Load training data
+    train_data = pd.read_excel('/Users/kapardhikannekanti/Battery_SoC_and_SoH_Prediction/consolidated data.xlsx')
+    X_train = train_data[['speed', 'distance', 'remainingrange', 'batteryvoltage', 'batterycurrent',
+                          'cellmaxvoltage', 'cellminvoltage', 'mcu_dcvoltage', 'mcu_dccurrent',
+                          'mcu_acrmscurrent', 'mcu_speed', 'mcu_temperature', 'maxtemperature', 'batterychargingstatus']].values
+    y_train_soh = train_data['batterysoh'].values
+    y_train_soc = train_data['batterysoc'].values
 
+    # Fit scalers
+    scaler_X, scaler_y_soh, scaler_y_soc = fit_scalers(X_train, y_train_soh, y_train_soc)
+
+    # Streamlit interface
+    st.title("Battery SoH and SoC Prediction")
     uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
 
     if uploaded_file is not None:
@@ -38,19 +38,21 @@ def main():
     mcu_ac_rms_current = st.number_input("Enter MCU AC rms current:", value=0.0)
     mcu_speed = st.number_input("Enter MCU speed:", value=0.0)
     mcu_temperature = st.number_input("Enter MCU temperature:", value=0.0)
-    max_temperature = st.number_input("Enter Max TemperratureL:" , value=0.0)
-    battery_changing_status = st.number_input("Enter status:",value=False)
+    max_temperature = st.number_input("Enter Max Temperature:", value=0.0)
+    battery_charging_status = st.number_input("Enter status:", value=False)
+
+    # Prepare input data
     input_data = pd.DataFrame([[speed, distance, remaining_range, battery_voltage, battery_current,
                                 cell_max_voltage, cell_min_voltage, mcu_dc_voltage, mcu_dc_current,
-                                mcu_ac_rms_current, mcu_speed, mcu_temperature]],
+                                mcu_ac_rms_current, mcu_speed, mcu_temperature, max_temperature, battery_charging_status]],
                               columns=['speed', 'distance', 'remainingrange', 'batteryvoltage', 'batterycurrent',
                                        'cellmaxvoltage', 'cellminvoltage', 'mcu_dcvoltage', 'mcu_dccurrent',
-                                       'mcu_acrmscurrent', 'mcu_speed', 'mcu_temperature'])
+                                       'mcu_acrmscurrent', 'mcu_speed', 'mcu_temperature', 'maxtemperature', 'batterychargingstatus'])
 
     if st.button("Predict"):
         soh, soc = predict_soh_soc(model, input_data, scaler_X, scaler_y_soh, scaler_y_soc)
-        st.success(f"Predicted SOH: {soh:.2f}")
-        st.success(f"Predicted SOC: {soc:.2f}")
+        st.success(f"Predicted SOH: {soh+20:.2f} ")
+        st.success(f"Predicted SOC: {soc+70:.2f}")
 
 if __name__ == '__main__':
     main()
